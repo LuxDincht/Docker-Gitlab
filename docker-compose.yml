@@ -1,0 +1,77 @@
+version: '3'
+
+networks:
+  proxy:
+    external:
+      name: ${NETWORK_PROXY}
+  gitlab-net:
+
+volumes:
+  data:
+  log:
+  config:
+
+services:
+  proxy:
+    image: traefik
+    command: --docker
+    hostname: ${DOMAIN_TRAEFIK}
+    networks:
+      - proxy
+    ports:
+      - 80:80
+      - 443:443
+      - "2332:22"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${PWD}/traefik/traefik.toml:/etc/traefik/traefik.toml
+      - ${PWD}/certs:/certs
+    labels:
+      traefik.enable: 'true'
+      traefik.docker.network: 'proxy'
+      traefik.backend: 'traefik'
+      traefik.frontend.rule: 'Host:${DOMAIN_TRAEFIK}'
+      traefik.port: '8080'
+
+  gitlab:
+    image: gitlab/gitlab-ce
+    hostname: ${DOMAIN_GITLAB}
+    environment:
+      VIRTUAL_HOST: ${DOMAIN_GITLAB}
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'https://${DOMAIN_GITLAB}'
+        nginx['ssl_protocols'] = "TLSv1 TLSv1.1 TLSv1.2"
+    networks:
+      proxy:
+      gitlab-net:
+        aliases:
+          - ${DOMAIN_GITLAB}
+    volumes:
+      - config:/etc/gitlab
+      - log:/var/log/gitlab
+      - data:/var/opt/gitlab
+      - ${PWD}/certs/${DOMAIN_GITLAB}.crt:/etc/gitlab/trusted-certs/${DOMAIN_GITLAB}.pem
+      - ${PWD}/certs/${DOMAIN_GITLAB}.crt:/etc/gitlab/ssl/${DOMAIN_GITLAB}.crt
+      - ${PWD}/certs/${DOMAIN_GITLAB}.key:/etc/gitlab/ssl/${DOMAIN_GITLAB}.key
+    labels:
+      traefik.enable: 'true'
+      traefik.docker.network: '${NETWORK_PROXY}'
+      traefik.backend: 'gitlab'
+      traefik.frontend.rule: 'Host:${DOMAIN_GITLAB}'
+      traefik.default.protocol: 'https'
+      traefik.port: '443'
+      traefik.ssh.backend: 'gitlab-ssh'
+      traefik.ssh.frontend.rule: 'Host:ssh.${DOMAIN_GITLAB}'
+      traefik.ssh.protocol: 'ssh'
+      traefik.ssh.port: '22'
+
+  gitlab-runner:
+    image: gitlab/gitlab-runner
+    networks:
+      - gitlab-net
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${PWD}/runner:/etc/gitlab-runner
+      - ${PWD}/certs:/etc/gitlab-runner/certs
+      - ${PWD}/certs/${DOMAIN_GITLAB}.crt:/etc/ssl/certs/${DOMAIN_GITLAB}.pem
+      - ${PWD}/certs/${DOMAIN_GITLAB}.crt:/etc/ssl/certs/ca-certificates.crt
