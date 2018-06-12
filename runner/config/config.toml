@@ -1,0 +1,24 @@
+concurrent = 1
+check_interval = 0
+
+[[runners]]
+  name = "my-runner"
+  url = "https://gitlab.domain/"
+  token = "TOKEN_FOURNI_PAR_GITLAB"
+  executor = "docker"
+  tls-cert-file = "/etc/gitlab-runner/certs/gitlab.domain.cer"
+  tls-key-file = "/etc/gitlab-runner/certs/gitlab.domain.key"
+  tls-ca-file = "/etc/gitlab-runner/certs/ca.crt"
+  pre_clone_script = "git config --global http.sslCAInfo /etc/ssl/certs/ca-certificates.crt"
+  [runners.docker]
+    extra_hosts = ["gitlab.domain:172.20.0.3"]
+    host = "unix:///var/run/docker.sock"
+    tls_cert_path = "/etc/gitlab-runner/certs"
+    tls_verify = false
+    image = "alpine:latest"
+    network_mode = "nom_complet_reseau-gitlab"
+    privileged = false
+    disable_cache = false
+    volumes = ["/var/run/docker.sock:/var/run/docker.sock", "/cache", "/etc/gitlab-runner/certs/gitlab.domain.cer:/etc/ssl/certs/ca.crt"]
+    shm_size = 0
+  [runners.cache]
