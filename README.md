@@ -11,9 +11,8 @@ Une brique Docker avec :
 ### Initialisation
 
 1. Pensez à modifier les fichier ``.env`` et ``traefik/traefik.toml`` afin de fournir vos noms de domaine et le réseau créé sur docker pour le proxy.
-2. Créer le répertoire ``certs`` et y stocker votre certificat SSL (crt) et votre clef (key) généré par vos soins ou une autorité tiers.
-3. Créer le réseau (network) docker sur lequel vous souhaitez mettre le proxy (renseigner dans l'étape 1).
-4. Vérifier les noms de fichiers et domaine dans le fichier ``docker-compose.yml``.
+2. Créer le réseau (network) docker sur lequel vous souhaitez mettre le proxy (renseigner dans l'étape 1).
+3. Vérifier les noms de fichiers et domaine dans le fichier ``docker-compose.yml``.
 
 ### Exécution
 
@@ -48,9 +47,8 @@ Pour plus de détail, je vous invite à vous renseigner sur Google et les sites 
 
 Lets'encrypt est une autorité de certification qui vous permet de délivrer gratuitement un certificat de domaine.  
 
+**C'est celui-ci que nous allons utiliser !**
+
 ##### Traefik
 
 Traefik embarque Let's Encrypt et vous permet de manière dynamique de créer des certificats de domaine pour chacun de vos containers qu'il doit gérer.  
-
-**ATTENTION** : Il est possible de faire fonctionner les certificats signé par une autorité de certification et ceux de Let's Encrypt en parrallèle mais cela est compliqué à mettre en place.  
-Pour le moment, je n'ai pas réussi à configuré Traefik pour que cela fonctionne.
