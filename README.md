@@ -1,9 +1,7 @@
 # Docker-Gitlab
 
-Une brique Docker avec :
+Une brique Docker clean avec seulement :
 
-- [Gitlab](https://about.gitlab.com/) avec SSL (HTTPS)
-- Gitlab Runner (CI/CD)
 - [Traefik](https://traefik.io/) (Proxy)
 
 ## Utilisation
@@ -24,7 +22,7 @@ docker-compose up -d
 
 ### Accès
 
-Pour accéder à **Traefik** ou **Gitlab**, il suffit de saisir votre nom de domaine associé à celui-ci dans le fichier ``.env``.
+Pour accéder à **Traefik**, il suffit de saisir votre nom de domaine associé à celui-ci dans le fichier ``.env``.
 
 ## Explications
 

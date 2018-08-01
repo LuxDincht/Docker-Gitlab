@@ -4,12 +4,6 @@ networks:
   proxy:
     external:
       name: ${NETWORK_PROXY}
-  gitlab-net:
-
-volumes:
-  data:
-  log:
-  config:
 
 services:
   proxy:
@@ -27,39 +21,3 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${PWD}/traefik/traefik.toml:/etc/traefik/traefik.toml
       - ${PWD}/traefik/acme.json:/acme.json
-
-  gitlab:
-    image: gitlab/gitlab-ce
-    hostname: ${DOMAIN_GITLAB}
-    environment:
-      VIRTUAL_HOST: ${DOMAIN_GITLAB}
-      GITLAB_OMNIBUS_CONFIG: |
-        external_url 'http://${DOMAIN_GITLAB}'
-        gitlab_rails['gitlab_shell_ssh_port'] = 2332
-    networks:
-      proxy:
-      gitlab-net:
-        aliases:
-          - ${DOMAIN_GITLAB}
-    ports:
-      - "2332:22"
-    volumes:
-      - config:/etc/gitlab
-      - log:/var/log/gitlab
-      - data:/var/opt/gitlab
-
-    labels:
-      traefik.enable: 'true'
-      traefik.docker.network: '${NETWORK_PROXY}'
-      traefik.backend: 'gitlab'
-      traefik.frontend.rule: 'Host:${DOMAIN_GITLAB}'
-      traefik.default.protocol: 'http'
-      traefik.port: '80'
-
-  gitlab-runner:
-    image: gitlab/gitlab-runner
-    networks:
-      - gitlab-net
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ${PWD}/runner:/etc/gitlab-runner
